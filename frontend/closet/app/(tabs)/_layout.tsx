@@ -1,7 +1,8 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import * as ImagePicker from 'expo-image-picker';
 import { Tabs, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
-import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 function ActionButton({ label, onPress, icon, iconColor }: any) {
   return (
@@ -42,6 +43,25 @@ const createAnimation = (distance: number) => ({
       return router.push(route as any);
     }, 200);
   };
+  const handleAddItems = async () => {
+  toggleMenu();
+
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Permission denied', 'Camera permission is required to add items.');
+    return;
+  }
+
+  const result = await ImagePicker.launchCameraAsync({
+    allowsEditing: true,
+    quality: 0.7,
+  });
+
+  if (!result.canceled) {
+    console.log('Captured image:', result.assets[0].uri);
+    router.push({ pathname: '/features/add-items', params: { image: result.assets[0].uri } });
+  }
+};
 
   return (
     <View style={styles.floatingContainer}>
@@ -49,20 +69,20 @@ const createAnimation = (distance: number) => ({
       {open && (
   <>
   <Animated.View style={[styles.actionWrapper, createAnimation(250)]}>
-     <ActionButton label="Add items" icon="plus" onPress={() => navigateAndClose("/add-item")} />
-   </Animated.View>
+    <ActionButton label="Add items" icon="plus" onPress={handleAddItems} />
+</Animated.View>
 
-   <Animated.View style={[styles.actionWrapper, createAnimation(190)]}>
-     <ActionButton label="Create outfit" icon="hanger" onPress={() => navigateAndClose("/outfit")} />
-   </Animated.View> 
+  <Animated.View style={[styles.actionWrapper, createAnimation(190)]}>
+    <ActionButton label="Create outfit" icon="hanger" onPress={() => navigateAndClose("/outfit")} />
+  </Animated.View> 
 
-   <Animated.View style={[styles.actionWrapper, createAnimation(130)]}>
-     <ActionButton label="Create lookbook" icon="book" onPress={() => navigateAndClose("/lookbook")} />
-    </Animated.View>
+  <Animated.View style={[styles.actionWrapper, createAnimation(130)]}>
+   <ActionButton label="Create lookbook" icon="book" onPress={() => navigateAndClose("/lookbook")} />
+  </Animated.View>
 
-    <Animated.View style={[styles.actionWrapper, createAnimation(70)]}>
-      <ActionButton label="Premium Features" icon="sparkles" onPress={() => navigateAndClose("/premium")} />
-    </Animated.View>
+  <Animated.View style={[styles.actionWrapper, createAnimation(70)]}>
+   <ActionButton label="Premium Features" icon="sparkles" onPress={() => navigateAndClose("/premium")} />
+  </Animated.View>
   </>
 )}
       {/* Main FAB */}
